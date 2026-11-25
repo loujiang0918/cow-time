@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Cow Time</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="widget">
+    <!-- 背景风格的装饰层：极光的光团和星空的星星。霓虹的描边由样式表直接画在卡片上。 -->
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+    <div class="stars" id="stars"></div>
+
+    <!-- 显示视图 -->
+    <section class="view view-display" id="display">
+      <div class="actions">
+        <button type="button" class="icon-button" id="open-settings" title="设置">⚙</button>
+        <button type="button" class="icon-button icon-button-danger" id="quit" title="退出">✕</button>
+      </div>
+      <h1 class="title">Cow Time</h1>
+      <div class="row">
+        <span class="label">本月已赚</span>
+        <span class="value">
+          <span class="currency" id="month-currency">¥</span><span class="odometer" id="month">--</span>
+        </span>
+      </div>
+      <div class="row">
+        <span class="label">今日已赚</span>
+        <span class="value">
+          <span class="currency" id="today-currency">¥</span><span class="odometer" id="today">--</span>
+        </span>
+        <span class="tag" id="state" hidden></span>
+      </div>
+      <div class="row row-holiday" id="holiday-row">
+        <span class="label" id="holiday-label">假期</span>
+        <span class="value">
+          <span class="number-holiday" id="holiday-days">--</span><span class="unit" id="holiday-unit">天</span>
+        </span>
+      </div>
+    </section>
+
+    <!-- 设置视图 -->
+    <section class="view view-settings" id="settings" hidden>
+      <form id="settings-form">
+        <header class="settings-header">
+          <h1 class="title">设置</h1>
+          <button type="button" class="icon-button" id="close-settings" title="返回">✕</button>
+        </header>
+        <label class="field">
+          <span class="label">月薪</span>
+          <input id="salary" type="number" min="0.01" step="0.01" autocomplete="off">
+        </label>
+        <!-- 星期标签：选中某一天之后，下面四个时间就是这一天生效的作息。
+             六、日平时不是工作日，只有调休上班时才会用到它们的作息。 -->
+        <div class="field weekdays">
+          <div class="chips chips-weekday" id="weekday-tabs">
+            <label><input type="radio" name="weekday" value="0"><span>默认</span></label>
+            <label><input type="radio" name="weekday" value="1"><span>一</span></label>
+            <label><input type="radio" name="weekday" value="2"><span>二</span></label>
+            <label><input type="radio" name="weekday" value="3"><span>三</span></label>
+            <label><input type="radio" name="weekday" value="4"><span>四</span></label>
+            <label><input type="radio" name="weekday" value="5"><span>五</span></label>
+            <i class="weekend-mark"></i>
+            <label class="weekend"><input type="radio" name="weekday" value="6"><span>六</span></label>
+            <label class="weekend"><input type="radio" name="weekday" value="7"><span>日</span></label>
+          </div>
+          <button type="button" class="reset-day" id="reset-day" title="恢复默认作息" hidden>↺</button>
+        </div>
+        <p class="weekday-note" id="weekday-note">六、日只在调休上班时生效</p>
+        <label class="field">
+          <span class="label">上班时间</span>
+          <input id="start" type="time">
+        </label>
+        <label class="field">
+          <span class="label">午休开始</span>
+          <input id="lunch-start" type="time">
+        </label>
+        <label class="field">
+          <span class="label">午休结束</span>
+          <input id="lunch-end" type="time">
+        </label>
+        <label class="field">
+          <span class="label">下班时间</span>
+          <input id="end" type="time">
+        </label>
+        <div class="field">
+          <span class="label">背景风格</span>
+          <div class="chips chips-style" id="style-picker">
+            <label><input type="radio" name="backgroundStyle" value="plain"><span>素色</span></label>
+            <label><input type="radio" name="backgroundStyle" value="aurora"><span>极光</span></label>
+            <label><input type="radio" name="backgroundStyle" value="neon"><span>霓虹</span></label>
+            <label><input type="radio" name="backgroundStyle" value="stars"><span>星空</span></label>
+          </div>
+        </div>
+        <!-- 透明度：只影响卡片底色。拖动时立即生效，并且自动保存，不需要点「保存」 -->
+        <div class="field">
+          <span class="label">透明度</span>
+          <input id="transparency" type="range" min="0" max="100" step="1" aria-label="透明度">
+          <span class="transparency-value" id="transparency-value">0%</span>
+        </div>
+        <p class="hint" id="hint"></p>
+        <div class="buttons">
+          <button type="button" id="cancel">取消</button>
+          <button type="submit" id="save" class="primary">保存</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

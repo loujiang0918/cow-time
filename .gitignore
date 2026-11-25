@@ -1,0 +1,6 @@
+# 编译产物
+/build/
+*.exe
+
+# 实现过程的分步计划，只在本地保留
+/docs/superpowers/plans/

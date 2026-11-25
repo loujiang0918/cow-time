@@ -1,0 +1,648 @@
+:root {
+  --text: #ececf1;
+  --accent: #6ee7a8;
+  --danger: #ff8a93;
+  --hover: rgba(255, 255, 255, 0.12);
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  font: 14px "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif;
+  color: var(--text);
+  user-select: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- 卡片与背景风格 ---------- */
+
+/* 卡片的默认外观就是极光风格：body 上没有 data-style，或取值没有对应样式时，都按极光显示。
+   每种风格只改动下面这几个变量，其余样式共用。
+   --card-alpha 是底色的不透明程度，由 main.js 写在 body 上。
+   .widget 自己不能再声明它，否则会挡住从 body 继承来的值；初始值只写在 var() 的回退位置。 */
+.widget {
+  --card: rgb(10 12 26 / var(--card-alpha, 0.4));
+  --rim: inset 0 0 0 1px rgba(255, 255, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  --dim: rgba(240, 242, 250, 0.74);
+  --text-glow: 0 1px 3px rgba(6, 8, 24, 0.4);
+  --number-color: var(--text);
+  --number-glow: drop-shadow(0 1px 2px rgba(6, 8, 24, 0.5));
+
+  position: relative;
+  isolation: isolate;
+  height: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card);
+  box-shadow: var(--rim);
+}
+
+body[data-style="plain"] .widget {
+  --card: rgb(24 24 30 / var(--card-alpha, 0.72));
+  --rim: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --dim: #9b9ba6;
+  --text-glow: none;
+  --number-glow: none;
+}
+
+body[data-style="neon"] .widget {
+  --card: rgb(4 6 18 / var(--card-alpha, 0.68));
+  --rim: inset 0 0 30px rgba(0, 229, 255, 0.17), inset 0 0 60px rgba(123, 92, 255, 0.1);
+  --dim: rgba(190, 240, 255, 0.78);
+  --text-glow: none;
+  --number-color: #fff;
+  --number-glow: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 7px rgba(0, 229, 255, 0.8))
+    drop-shadow(0 0 16px rgba(255, 61, 240, 0.4));
+}
+
+body[data-style="stars"] .widget {
+  --card: rgb(7 9 24 / var(--card-alpha, 0.58));
+  --rim: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --dim: rgba(214, 224, 255, 0.76);
+  --text-glow: none;
+  --number-color: #fff;
+  --number-glow: drop-shadow(0 0 6px rgba(160, 190, 255, 0.55));
+}
+
+/* 极光：三个柔和的光团缓慢地平移和缩放 */
+.blob {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.blob.b1 {
+  width: 170px;
+  height: 170px;
+  left: -50px;
+  top: -90px;
+  background: radial-gradient(circle, rgba(46, 224, 255, 0.78) 0%, rgba(46, 224, 255, 0) 68%);
+  animation: drift1 13s ease-in-out infinite alternate;
+}
+
+.blob.b2 {
+  width: 200px;
+  height: 200px;
+  right: -80px;
+  top: -40px;
+  background: radial-gradient(circle, rgba(154, 96, 255, 0.76) 0%, rgba(154, 96, 255, 0) 68%);
+  animation: drift2 17s ease-in-out infinite alternate;
+}
+
+.blob.b3 {
+  width: 150px;
+  height: 150px;
+  left: 70px;
+  bottom: -90px;
+  background: radial-gradient(circle, rgba(255, 92, 196, 0.55) 0%, rgba(255, 92, 196, 0) 68%);
+  animation: drift3 11s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 {
+  to {
+    transform: translate3d(70px, 60px, 0) scale(1.2);
+  }
+}
+
+@keyframes drift2 {
+  to {
+    transform: translate3d(-60px, 50px, 0) scale(0.9);
+  }
+}
+
+@keyframes drift3 {
+  to {
+    transform: translate3d(-50px, -40px, 0) scale(1.25);
+  }
+}
+
+body[data-style="plain"] .blob,
+body[data-style="neon"] .blob,
+body[data-style="stars"] .blob {
+  display: none;
+}
+
+/* 霓虹：一圈缓缓转动的彩色描边，以及一层淡淡的色泽 */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+body[data-style="neon"] .widget::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--angle), #00e5ff, #7b5cff 28%, #ff3df0 52%, #ffb03d 72%, #00e5ff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: turn 7s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes turn {
+  to {
+    --angle: 360deg;
+  }
+}
+
+body[data-style="neon"] .widget::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(0, 229, 255, 0.1), transparent 45%, rgba(255, 61, 240, 0.1));
+  pointer-events: none;
+}
+
+/* 星空：一片缓慢漂移的星云，星星闪烁着往上飘 */
+body[data-style="stars"] .widget::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 25% 115%, rgba(104, 74, 255, 0.72), transparent 62%),
+    radial-gradient(ellipse at 90% -15%, rgba(38, 170, 240, 0.6), transparent 60%);
+  animation: nebula 20s ease-in-out infinite alternate;
+}
+
+@keyframes nebula {
+  to {
+    transform: translate3d(6%, -6%, 0) scale(1.12);
+  }
+}
+
+.stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: none;
+  pointer-events: none;
+}
+
+body[data-style="stars"] .stars {
+  display: block;
+}
+
+.stars span {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  animation: twinkle var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes twinkle {
+  from {
+    opacity: 0.12;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0.95;
+    transform: translateY(-5px);
+  }
+}
+
+/* ---------- 两个视图共用的文字与数字 ---------- */
+
+.view {
+  position: relative;
+  z-index: 2;
+}
+
+.title,
+.label,
+.currency,
+.unit {
+  color: var(--dim);
+  text-shadow: var(--text-glow);
+}
+
+.title {
+  margin: 0 56px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: 0.04em;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 22px;
+}
+
+.label {
+  flex: none;
+}
+
+.value {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.currency,
+.unit {
+  font-size: 12px;
+  line-height: 22px;
+}
+
+.number-holiday {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  text-shadow: var(--text-glow);
+}
+
+/* 里程表滚动数字：每一位是一条 0-9 的竖直纸带，纸带的高度和过渡时长与 main.js 里的常量一致 */
+.odometer {
+  display: inline-flex;
+  align-items: flex-end;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
+  color: var(--number-color);
+  filter: var(--number-glow);
+}
+
+.od-digit {
+  display: inline-block;
+  width: 1ch;
+  height: 22px;
+  overflow: hidden;
+}
+
+.od-reel {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.od-reel span {
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+}
+
+.od-char {
+  display: inline-block;
+  height: 22px;
+  line-height: 22px;
+}
+
+/* ---------- 显示视图 ---------- */
+
+/* 整个显示视图都可以拖动窗口 */
+.view-display {
+  --wails-draggable: drag;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+}
+
+.actions {
+  --wails-draggable: no-drag;
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.widget:hover .actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.icon-button {
+  --wails-draggable: no-drag;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dim);
+  font: 13px/22px "Segoe UI", "Segoe UI Symbol", sans-serif;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.icon-button-danger:hover {
+  background: #e84855;
+  color: #fff;
+}
+
+/* 假期一行：名字可能很长，放不下时用省略号 */
+.row-holiday .label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-holiday .value {
+  flex: none;
+}
+
+.row-holiday.is-ongoing .number-holiday {
+  color: var(--accent);
+}
+
+.tag {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--hover);
+  font-size: 11px;
+  color: var(--dim);
+}
+
+/* ---------- 设置视图 ---------- */
+
+.view-settings form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+}
+
+.settings-header .title {
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+}
+
+.field .label {
+  font-size: 13px;
+}
+
+.field input {
+  width: 110px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color-scheme: dark;
+  user-select: text;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field input[type="number"] {
+  text-align: right;
+}
+
+/* 去掉数字输入框右边的上下箭头 */
+.field input[type="number"]::-webkit-inner-spin-button,
+.field input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 一组并排的单选按钮，星期标签和背景风格共用。
+   单选框本身铺满按钮并透明，点击落在它上面，文字显示在它后面。 */
+.chips {
+  display: flex;
+  gap: 3px;
+}
+
+.chips label {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.chips input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.chips span {
+  position: relative;
+  display: block;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  line-height: 24px;
+}
+
+.chips-style span {
+  padding: 0 5px;
+  font-size: 12px;
+}
+
+.chips input:checked + span {
+  background: var(--accent);
+  color: #0b2a1a;
+  font-weight: 600;
+}
+
+.chips input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* 星期标签：「默认」加一周七天，左侧对齐，右边留出「恢复默认」按钮的位置 */
+.weekdays {
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.chips-weekday {
+  gap: 2px;
+}
+
+.chips-weekday span {
+  padding: 0 2px;
+  font-size: 13px;
+}
+
+/* 周末：五和六之间有一条分隔线，六、日两个标签比工作日更淡。选中时恢复正常亮度 */
+.weekend-mark {
+  display: block;
+  width: 1px;
+  height: 12px;
+  margin: 6px 1px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.chips .weekend span {
+  opacity: 0.5;
+}
+
+.chips .weekend input:checked + span {
+  opacity: 1;
+}
+
+/* 星期标签下面常驻的一行说明，选中六或日时变亮 */
+.weekday-note {
+  margin: -2px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dim);
+  opacity: 0.75;
+}
+
+.weekday-note.is-active {
+  opacity: 1;
+  color: var(--text);
+}
+
+/* 与默认作息不同的星期，标签下方有一个小圆点 */
+.chips .is-overridden span::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 3px;
+  height: 3px;
+  margin-left: -1.5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.chips .is-overridden input:checked + span::after {
+  background: #0b2a1a;
+}
+
+.reset-day {
+  --wails-draggable: no-drag;
+  width: 22px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dim);
+  font: 14px/24px "Segoe UI", "Segoe UI Symbol", sans-serif;
+  cursor: pointer;
+}
+
+.reset-day:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+/* 透明度滑块：不沿用文字输入框的外观，用系统自带的滑块样式并染成强调色 */
+.field input[type="range"] {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  height: 20px;
+  margin: 0 6px 0 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.transparency-value {
+  flex: none;
+  width: 34px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text);
+}
+
+.hint {
+  min-height: 16px;
+  margin: 0;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--danger);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.buttons button {
+  --wails-draggable: no-drag;
+  height: 30px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--hover);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.buttons button.primary {
+  background: var(--accent);
+  color: #0b2a1a;
+  font-weight: 600;
+}
+
+.buttons button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
